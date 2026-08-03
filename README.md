@@ -4,6 +4,16 @@ NeuronPay is a decentralized pay-as-you-go micro-billing protocol designed for g
 
 ---
 
+## ✨ Key Features
+
+- **Pay-per-Token Micro-Billing**: Bypasses expensive flat-rate subscriptions by charging users micro-amounts of XLM corresponding to the exact number of prompt and response tokens processed.
+- **Wallet-Based Session Keys**: Connects securely via Freighter Wallet on the Stellar Testnet, allowing passwordless and card-free user authentication.
+- **Interactive Prompt Terminal**: A retro-cyberpunk typewriter console that visualizes the token delivery sequence, mock AI compiler configurations, and transaction feedback logs in real-time.
+- **On-Chain Consensus Pipeline**: Visualizes step-by-step transaction validation status lights (sequence loading ➜ signature confirmation ➜ Horizon node broadcasting).
+- **Testnet Friendbot Refueling**: Instantly funds unfunded/new Stellar accounts with 10,000 Testnet XLM directly inside the client dashboard.
+
+---
+
 ## 🛠️ Technical Stack
 
 - **Framework**: Next.js 15 (App Router, React 19)
