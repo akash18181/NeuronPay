@@ -52,7 +52,11 @@ Ensure you have [Node.js (v18 or higher)](https://nodejs.org/) installed on your
 
 ### 1. Clone & Enter Project Root
 ```bash
-cd d:\NeuronPay
+# Clone the repository
+git clone https://github.com/akash18181/NeuronPay.git
+
+# Enter the project directory
+cd NeuronPay
 ```
 
 ### 2. Install Project Dependencies
@@ -130,4 +134,10 @@ This section contains the implementation details and verification proof for the 
 
 ### Level 2: Soroban Smart Contract Billing (Coming Soon)
 *This section will be populated once the Soroban smart contract billing integrations are completed.*
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
