@@ -157,8 +157,8 @@ node scripts/test_stellar.js
 *(Screenshots to be attached manually for verification)*
 
 ##### 1. Wallet Options Available
-*Proof of wallet options available (e.g. Freighter Integration):*
-<!-- Place wallet options screenshot here -->
+*Proof of wallet options available
+<img width="1860" height="1036" alt="{A5AFD7A8-C659-481A-AF5C-36F7C9B9CD15}" src="https://github.com/user-attachments/assets/6b55b95c-b9e7-46cf-b289-8d7321060d99" />
 
 ##### 2. Deployed Contract Address
 *Proof of the deployed Soroban contract address on Stellar Expert Explorer:*
