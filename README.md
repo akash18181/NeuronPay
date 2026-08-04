@@ -122,7 +122,7 @@ This section contains the implementation details and verification proof for the 
 
 ##### 3. Transaction Approval Prompt
 *Proof of Freighter Wallet signature prompt request:*
-<img width="1902" height="1082" alt="{68256B18-B983-465B-839B-D41A498922BF}" src="https://github.com/user-attachments/assets/8e00dcba-7f1f-4952-84bd-ac25d0f03105" />
+<img width="1896" height="1085" alt="{95FFB3D7-A0F7-4809-904E-6DC1A6A0A34B}" src="https://github.com/user-attachments/assets/a851aeb6-43c0-4df1-93f5-dcfbc2925272" />
 <!-- Place freighter prompt screenshot here -->
 
 ##### 4. Successful Testnet Transaction & Feedback
