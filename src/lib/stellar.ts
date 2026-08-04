@@ -6,6 +6,7 @@ import {
   signTransaction as freighterSignTx,
 } from "@stellar/freighter-api";
 import { Horizon, TransactionBuilder, Networks, Operation, Asset, rpc, Address, nativeToScVal, Memo } from "@stellar/stellar-sdk";
+import albedo from "@albedo-link/intent";
 
 export const HORIZON_URL = "https://horizon-testnet.stellar.org";
 export const SOROBAN_RPC_URL = "https://soroban-testnet.stellar.org";
@@ -133,7 +134,8 @@ export async function requestFriendbotFunding(publicKey: string): Promise<boolea
  */
 export async function executePaymentFlow(
   senderPublicKey: string,
-  amountXlm: string
+  amountXlm: string,
+  walletType: "freighter" | "albedo" = "freighter"
 ): Promise<{ success: boolean; hash?: string; isSoroban: boolean; error?: string }> {
   try {
     // Check balance first
@@ -210,23 +212,36 @@ export async function executePaymentFlow(
     const xdr = transaction.toXDR();
     let signedXdr: string | null = null;
 
-    try {
-      const signedResult = await freighterSignTx(xdr, {
-        networkPassphrase: Networks.TESTNET,
-      });
-
-      if (typeof signedResult === "string") {
-        signedXdr = signedResult;
-      } else if (signedResult && typeof signedResult === "object") {
-        if ("signedTxXdr" in signedResult && typeof signedResult.signedTxXdr === "string") {
-          signedXdr = signedResult.signedTxXdr;
-        } else if ("error" in signedResult && signedResult.error) {
-          throw new Error(String(signedResult.error));
-        }
+    if (walletType === "albedo") {
+      try {
+        const albedoResult = await albedo.tx({
+          xdr,
+          network: "testnet",
+        });
+        signedXdr = albedoResult.signed_envelope_xdr;
+      } catch (signErr: any) {
+        console.error("Albedo signing error:", signErr);
+        throw signErr;
       }
-    } catch (signErr: any) {
-      console.error("Freighter signing error:", signErr);
-      throw signErr;
+    } else {
+      try {
+        const signedResult = await freighterSignTx(xdr, {
+          networkPassphrase: Networks.TESTNET,
+        });
+
+        if (typeof signedResult === "string") {
+          signedXdr = signedResult;
+        } else if (signedResult && typeof signedResult === "object") {
+          if ("signedTxXdr" in signedResult && typeof signedResult.signedTxXdr === "string") {
+            signedXdr = signedResult.signedTxXdr;
+          } else if ("error" in signedResult && signedResult.error) {
+            throw new Error(String(signedResult.error));
+          }
+        }
+      } catch (signErr: any) {
+        console.error("Freighter signing error:", signErr);
+        throw signErr;
+      }
     }
 
     if (!signedXdr) {

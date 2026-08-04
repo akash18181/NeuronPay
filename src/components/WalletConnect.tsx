@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, LogOut, ShieldAlert, Loader2, RefreshCw } from "lucide-react";
+import { Wallet, LogOut, ShieldAlert, Loader2, RefreshCw, Cpu, Zap } from "lucide-react";
+import albedo from "@albedo-link/intent";
 import {
   isFreighterInstalled,
   connectFreighterWallet,
@@ -15,7 +16,7 @@ interface WalletConnectProps {
   walletBalance: string | null;
   network: string | null;
   isNetworkCorrect: boolean;
-  onConnect: (address: string, network: string, balance: string) => void;
+  onConnect: (address: string, network: string, balance: string, walletType: "freighter" | "albedo") => void;
   onDisconnect: () => void;
   onUpdateBalance: (balance: string) => void;
   onUpdateNetwork: (network: string, isCorrect: boolean) => void;
@@ -35,6 +36,7 @@ export default function WalletConnect({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showSelector, setShowSelector] = useState(false);
 
   // Check if Freighter is installed on mount
   useEffect(() => {
@@ -44,14 +46,19 @@ export default function WalletConnect({
 
       // Auto-connect if wallet was previously active and not explicitly disconnected
       const savedWallet = localStorage.getItem("neuronpay_active_wallet");
+      const savedType = localStorage.getItem("neuronpay_wallet_type") as "freighter" | "albedo" || "freighter";
       const userDisconnected = localStorage.getItem("neuronpay_user_disconnected");
 
-      if (savedWallet && userDisconnected !== "true" && installed) {
+      if (savedWallet && userDisconnected !== "true") {
         try {
-          const networkName = await getFreighterNetwork();
-          const isCorrect = networkName === "TESTNET";
-          const balance = await fetchBalance(savedWallet);
-          onConnect(savedWallet, networkName || "UNKNOWN", balance);
+          if (savedType === "albedo") {
+            const balance = await fetchBalance(savedWallet);
+            onConnect(savedWallet, "TESTNET", balance, "albedo");
+          } else if (installed) {
+            const networkName = await getFreighterNetwork();
+            const balance = await fetchBalance(savedWallet);
+            onConnect(savedWallet, networkName || "UNKNOWN", balance, "freighter");
+          }
         } catch (err) {
           console.warn("Auto-connect failed:", err);
         }
@@ -63,6 +70,11 @@ export default function WalletConnect({
   // Poll for network changes occasionally when wallet is connected
   useEffect(() => {
     if (!walletAddress) return;
+    const savedType = localStorage.getItem("neuronpay_wallet_type");
+    if (savedType === "albedo") {
+      onUpdateNetwork("TESTNET", true);
+      return;
+    }
 
     const interval = setInterval(async () => {
       try {
@@ -77,15 +89,14 @@ export default function WalletConnect({
     return () => clearInterval(interval);
   }, [walletAddress]);
 
-  const handleConnect = async () => {
+  const handleConnectFreighter = async () => {
     setIsConnecting(true);
     setErrorMsg(null);
+    setShowSelector(false);
     try {
       const result = await connectFreighterWallet();
       if (result.address) {
-        // Fetch network and balance
         const networkName = await getFreighterNetwork();
-        const isCorrect = networkName === "TESTNET";
         
         let balance = "0.0000";
         try {
@@ -95,10 +106,11 @@ export default function WalletConnect({
         }
 
         // Save state in parent component
-        onConnect(result.address, networkName || "UNKNOWN", balance);
+        onConnect(result.address, networkName || "UNKNOWN", balance, "freighter");
         
         // Save in local storage
         localStorage.setItem("neuronpay_active_wallet", result.address);
+        localStorage.setItem("neuronpay_wallet_type", "freighter");
         localStorage.removeItem("neuronpay_user_disconnected");
       } else {
         setErrorMsg(result.error || "Could not retrieve public key from Freighter.");
@@ -111,9 +123,42 @@ export default function WalletConnect({
     }
   };
 
+  const handleConnectAlbedo = async () => {
+    setIsConnecting(true);
+    setErrorMsg(null);
+    setShowSelector(false);
+    try {
+      const res = await albedo.publicKey({});
+      if (res.pubkey) {
+        let balance = "0.0000";
+        try {
+          balance = await fetchBalance(res.pubkey);
+        } catch (bErr) {
+          console.warn("Could not fetch initial balance, defaulting to 0", bErr);
+        }
+
+        // Save state in parent component
+        onConnect(res.pubkey, "TESTNET", balance, "albedo");
+
+        // Save in local storage
+        localStorage.setItem("neuronpay_active_wallet", res.pubkey);
+        localStorage.setItem("neuronpay_wallet_type", "albedo");
+        localStorage.removeItem("neuronpay_user_disconnected");
+      } else {
+        setErrorMsg("Could not retrieve public key from Albedo.");
+      }
+    } catch (err: any) {
+      console.error("Albedo connection error:", err);
+      setErrorMsg(err?.message || "Albedo connection request was closed or canceled by user.");
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
   const handleDisconnect = () => {
     localStorage.setItem("neuronpay_user_disconnected", "true");
     localStorage.removeItem("neuronpay_active_wallet");
+    localStorage.removeItem("neuronpay_wallet_type");
     onDisconnect();
   };
 
@@ -208,13 +253,9 @@ export default function WalletConnect({
           >
             <button
               id="connect-wallet-btn"
-              onClick={handleConnect}
-              disabled={isConnecting || isInstalled === false}
-              className={`px-5 py-2.5 rounded-full font-space font-bold text-xs flex items-center gap-2 transition-all relative overflow-hidden ${
-                isInstalled === false
-                  ? "bg-slate-900 border border-slate-800 text-slate-500 cursor-not-allowed"
-                  : "bg-cyan-500 hover:bg-cyan-400 text-slate-950 border border-cyan-400 shadow-[0_0_20px_rgba(0,243,255,0.25)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-              }`}
+              onClick={() => setShowSelector(true)}
+              disabled={isConnecting}
+              className="px-5 py-2.5 rounded-full font-space font-bold text-xs flex items-center gap-2 transition-all relative overflow-hidden bg-cyan-500 hover:bg-cyan-400 text-slate-950 border border-cyan-400 shadow-[0_0_20px_rgba(0,243,255,0.25)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               {isConnecting ? (
                 <>
@@ -229,6 +270,75 @@ export default function WalletConnect({
               )}
             </button>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Wallet Selector Modal Overlay */}
+      <AnimatePresence>
+        {showSelector && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-sm rounded-3xl bg-[#0b0f1a] border border-white/10 p-6 shadow-2xl relative"
+            >
+              <button
+                onClick={() => setShowSelector(false)}
+                className="absolute top-4 right-4 text-slate-500 hover:text-white font-mono text-lg font-bold"
+              >
+                ×
+              </button>
+              
+              <h3 className="font-space text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-cyan-400" />
+                Connect Wallet
+              </h3>
+              <p className="text-xs text-slate-400 mb-5">
+                Select your Web3 authorization keys gateway to connect with Testnet.
+              </p>
+              
+              <div className="space-y-3">
+                {/* Option 1: Freighter Wallet */}
+                <button
+                  onClick={handleConnectFreighter}
+                  disabled={isConnecting}
+                  className="w-full p-4 text-left rounded-2xl bg-slate-900/50 hover:bg-[#12182b] border border-white/5 hover:border-cyan-500/30 transition-all flex items-center gap-3 group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Cpu className="w-5 h-5 group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div>
+                    <span className="font-space font-bold text-sm text-white block">
+                      Freighter Extension
+                    </span>
+                    <span className="text-[10px] text-slate-500 block mt-0.5">
+                      Stellar browser extension
+                    </span>
+                  </div>
+                </button>
+
+                {/* Option 2: Albedo Wallet */}
+                <button
+                  onClick={handleConnectAlbedo}
+                  disabled={isConnecting}
+                  className="w-full p-4 text-left rounded-2xl bg-slate-900/50 hover:bg-[#12182b] border border-white/5 hover:border-purple-500/30 transition-all flex items-center gap-3 group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 shrink-0">
+                    <Zap className="w-5 h-5 group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div>
+                    <span className="font-space font-bold text-sm text-white block">
+                      Albedo Web Wallet
+                    </span>
+                    <span className="text-[10px] text-slate-500 block mt-0.5">
+                      Secure browser-delegate keys
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

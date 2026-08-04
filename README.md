@@ -2,6 +2,9 @@
 
 NeuronPay is a decentralized pay-as-you-go micro-billing protocol designed for generative AI services and LLM computing. By integrating the Stellar blockchain network, it replaces rigid and expensive monthly AI subscriptions with frictionless, instant micro-payments. Users connect their Web3 wallets to purchase exactly the amount of prompt and response tokens they consume, enabling truly open and pay-per-use computing resources.
 
+### 🌐 Live Production DApp
+- **Vercel Deployment**: [https://neuron-pay.vercel.app](https://neuron-pay.vercel.app)
+
 ---
 
 ## ✨ Key Features

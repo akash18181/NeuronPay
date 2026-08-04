@@ -106,6 +106,7 @@ const TIER_CUSTOM_LOGS = [
 export default function Page() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<string | null>(null);
+  const [walletType, setWalletType] = useState<"freighter" | "albedo">("freighter");
   const [network, setNetwork] = useState<string | null>(null);
   const [isNetworkCorrect, setIsNetworkCorrect] = useState<boolean>(true);
   const [txHistory, setTxHistory] = useState<TxReceipt[]>([]);
@@ -140,15 +141,16 @@ export default function Page() {
     }
   }, [terminalLogs]);
 
-  const handleWalletConnect = (address: string, net: string, balance: string) => {
+  const handleWalletConnect = (address: string, net: string, balance: string, type: "freighter" | "albedo") => {
     setWalletAddress(address);
     setNetwork(net);
     setWalletBalance(balance);
+    setWalletType(type);
     setIsNetworkCorrect(net === "TESTNET");
     
     // Add logs to terminal
     setTerminalLogs([
-      "🟢 Console online. Connected to Freighter wallet.",
+      `🟢 Console online. Connected to ${type === "albedo" ? "Albedo Web Wallet" : "Freighter Extension"}.`,
       `🟢 Account: ${address.slice(0, 15)}...${address.slice(-15)}`,
       `🟢 Network: ${net}`,
       `🟢 Current Balance: ${balance} XLM`,
@@ -357,6 +359,7 @@ export default function Page() {
             <TransactionCard
               walletAddress={walletAddress}
               walletBalance={walletBalance}
+              walletType={walletType}
               isNetworkCorrect={isNetworkCorrect}
               onTransactionSuccess={handleTransactionSuccess}
             />

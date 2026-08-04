@@ -26,6 +26,7 @@ import {
 interface TransactionCardProps {
   walletAddress: string | null;
   walletBalance: string | null;
+  walletType: "freighter" | "albedo";
   isNetworkCorrect: boolean;
   onTransactionSuccess: (txHash: string, amountXlm: string, tierName: string, isSoroban: boolean) => void;
 }
@@ -44,6 +45,7 @@ interface Tier {
 export default function TransactionCard({
   walletAddress,
   walletBalance,
+  walletType,
   isNetworkCorrect,
   onTransactionSuccess,
 }: TransactionCardProps) {
@@ -117,7 +119,7 @@ export default function TransactionCard({
 
     try {
       // Execute build + sign + submission workflow
-      const response = await executePaymentFlow(walletAddress, amountToPay);
+      const response = await executePaymentFlow(walletAddress, amountToPay, walletType);
 
       if (response.success && response.hash) {
         setLastTxHash(response.hash);
