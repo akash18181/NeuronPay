@@ -5,13 +5,16 @@ import {
   getNetwork as freighterGetNetwork,
   signTransaction as freighterSignTx,
 } from "@stellar/freighter-api";
-import { Horizon, TransactionBuilder, Networks, Operation, Asset } from "@stellar/stellar-sdk";
+import { Horizon, TransactionBuilder, Networks, Operation, Asset, rpc, Address, nativeToScVal, Memo } from "@stellar/stellar-sdk";
 
 export const HORIZON_URL = "https://horizon-testnet.stellar.org";
+export const SOROBAN_RPC_URL = "https://soroban-testnet.stellar.org";
 export const TREASURY_ADDRESS = "GDOLQUM4D5SKAJQUT4XARMQVXRAP63RDK4FQKYG52GCOBJMQCF2WCQBX";
+export const DEPLOYED_SOROBAN_CONTRACT_ID = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
-// Initialize the Horizon server for Testnet
+// Initialize Horizon & Soroban RPC servers for Testnet
 export const server = new Horizon.Server(HORIZON_URL);
+export const sorobanServer = new rpc.Server(SOROBAN_RPC_URL);
 
 /**
  * Check if the Freighter extension is installed in the browser.
@@ -125,18 +128,20 @@ export async function requestFriendbotFunding(publicKey: string): Promise<boolea
 
 /**
  * Build and sign a payment transaction using Freighter Wallet.
- * Returns the txHash after successful submission.
+ * Invokes a Soroban smart contract call to transfer tokens, falling back to Horizon native payment if simulation fails.
+ * Returns the txHash and isSoroban flag after successful submission.
  */
 export async function executePaymentFlow(
   senderPublicKey: string,
   amountXlm: string
-): Promise<{ success: boolean; hash?: string; error?: string }> {
+): Promise<{ success: boolean; hash?: string; isSoroban: boolean; error?: string }> {
   try {
     // Check balance first
     const currentBalance = await fetchBalance(senderPublicKey);
     if (parseFloat(currentBalance) < parseFloat(amountXlm)) {
       return {
         success: false,
+        isSoroban: false,
         error: `Insufficient balance. Required: ${amountXlm} XLM, Available: ${currentBalance} XLM`,
       };
     }
@@ -152,20 +157,55 @@ export async function executePaymentFlow(
       console.warn("Could not fetch base fee, defaulting to 100 stroops", e);
     }
 
-    // Build the transaction
-    const transaction = new TransactionBuilder(account, {
-      fee: baseFee.toString(),
-      networkPassphrase: Networks.TESTNET,
-    })
-      .addOperation(
-        Operation.payment({
-          destination: TREASURY_ADDRESS,
-          asset: Asset.native(),
-          amount: amountXlm,
-        })
-      )
-      .setTimeout(300)
-      .build();
+    // Convert XLM amount to Stroops (1 XLM = 10,000,000 Stroops)
+    const amountStroops = Math.round(parseFloat(amountXlm) * 10000000);
+
+    // 1. Build Soroban Smart Contract Invocation Operation
+    const contractOp = Operation.invokeContractFunction({
+      contract: DEPLOYED_SOROBAN_CONTRACT_ID,
+      function: "transfer",
+      args: [
+        new Address(senderPublicKey).toScVal(),
+        new Address(TREASURY_ADDRESS).toScVal(),
+        nativeToScVal(amountStroops, { type: "i128" }),
+      ],
+    });
+
+    let transaction;
+    let isSoroban = false;
+
+    try {
+      const sorobanTx = new TransactionBuilder(account, {
+        fee: "100000",
+        networkPassphrase: Networks.TESTNET,
+      })
+        .addOperation(contractOp)
+        .setTimeout(60)
+        .build();
+
+      const sim = await sorobanServer.simulateTransaction(sorobanTx);
+      if (rpc.Api.isSimulationSuccess(sim)) {
+        transaction = rpc.assembleTransaction(sorobanTx, sim).build();
+        isSoroban = true;
+      } else {
+        throw new Error("Soroban simulation did not succeed");
+      }
+    } catch (sorobanErr) {
+      console.warn("Soroban contract invocation fallback to payment:", sorobanErr);
+      transaction = new TransactionBuilder(account, {
+        fee: baseFee.toString(),
+        networkPassphrase: Networks.TESTNET,
+      })
+        .addOperation(
+          Operation.payment({
+            destination: TREASURY_ADDRESS,
+            asset: Asset.native(),
+            amount: amountXlm,
+          })
+        )
+        .setTimeout(300)
+        .build();
+    }
 
     const xdr = transaction.toXDR();
     let signedXdr: string | null = null;
@@ -194,12 +234,23 @@ export async function executePaymentFlow(
     }
 
     const txToSubmit = TransactionBuilder.fromXDR(signedXdr, Networks.TESTNET);
-    const submitResult = await server.submitTransaction(txToSubmit);
+    let submitResult;
 
-    return {
-      success: true,
-      hash: submitResult.hash,
-    };
+    if (isSoroban) {
+      submitResult = await sorobanServer.sendTransaction(txToSubmit);
+      return {
+        success: true,
+        hash: submitResult.hash,
+        isSoroban: true,
+      };
+    } else {
+      submitResult = await server.submitTransaction(txToSubmit);
+      return {
+        success: true,
+        hash: submitResult.hash,
+        isSoroban: false,
+      };
+    }
   } catch (error: any) {
     console.error("Transaction execution failed:", error);
     throw error;

@@ -32,6 +32,7 @@ interface TxReceipt {
   tierName: string;
   timestamp: string;
   status: "SUCCESS" | "FAILED";
+  isSoroban?: boolean;
 }
 
 const TIER_LITE_LOGS = [
@@ -176,9 +177,16 @@ export default function Page() {
     setIsNetworkCorrect(isCorrect);
   };
 
-  const startTerminalStream = (tierName: string) => {
+  const startTerminalStream = (tierName: string, isSoroban?: boolean) => {
     setIsStreaming(true);
-    setTerminalLogs((prev) => [...prev, "", `⏳ Preparing token stream for: ${tierName}`]);
+    setTerminalLogs((prev) => [
+      ...prev, 
+      "", 
+      `⏳ Preparing token stream for: ${tierName}`,
+      isSoroban 
+        ? "🟢 [SOROBAN] Routing transaction via Smart Contract CDLZFC3S..."
+        : "⚡ [HORIZON] Routing transaction via standard Payment Channel..."
+    ]);
     
     let sourceLogs: string[] = TIER_CUSTOM_LOGS;
     let targetTokens = 25000; // default custom tokens
@@ -216,7 +224,7 @@ export default function Page() {
     }, 250);
   };
 
-  const handleTransactionSuccess = async (txHash: string, amountXlm: string, tierName: string) => {
+  const handleTransactionSuccess = async (txHash: string, amountXlm: string, tierName: string, isSoroban: boolean) => {
     // 1. Refresh balance
     if (walletAddress) {
       try {
@@ -238,6 +246,7 @@ export default function Page() {
       tierName,
       timestamp: formattedDate,
       status: "SUCCESS",
+      isSoroban,
     };
 
     const updatedHistory = [newReceipt, ...txHistory];
@@ -246,7 +255,7 @@ export default function Page() {
 
     // 3. Trigger active visual stream in right console!
     setActiveTokenCount(0);
-    startTerminalStream(tierName);
+    startTerminalStream(tierName, isSoroban);
   };
 
   const handleClearHistory = () => {
@@ -567,9 +576,18 @@ export default function Page() {
                           </td>
 
                           <td className="py-4 px-4">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/20">
-                              SUCCESS
-                            </span>
+                            <div className="flex flex-col items-start gap-1">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/20">
+                                SUCCESS
+                              </span>
+                              <span className={`inline-flex items-center text-[9px] font-bold px-2 py-0.5 rounded-full border ${
+                                tx.isSoroban 
+                                  ? "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.05)]"
+                                  : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                              }`}>
+                                {tx.isSoroban ? "Soroban" : "Horizon"}
+                              </span>
+                            </div>
                           </td>
 
                           <td className="py-4 px-4 text-slate-400 font-mono text-[10px]">

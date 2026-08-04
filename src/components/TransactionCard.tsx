@@ -27,7 +27,7 @@ interface TransactionCardProps {
   walletAddress: string | null;
   walletBalance: string | null;
   isNetworkCorrect: boolean;
-  onTransactionSuccess: (txHash: string, amountXlm: string, tierName: string) => void;
+  onTransactionSuccess: (txHash: string, amountXlm: string, tierName: string, isSoroban: boolean) => void;
 }
 
 interface Tier {
@@ -51,6 +51,7 @@ export default function TransactionCard({
   const [customAmount, setCustomAmount] = useState<string>("1.0");
   const [txState, setTxState] = useState<"idle" | "signing" | "submitting" | "success" | "error">("idle");
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);
+  const [lastTxIsSoroban, setLastTxIsSoroban] = useState<boolean>(false);
   const [errorDetails, setErrorDetails] = useState<ErrorDetails | null>(null);
 
   const tiers: Tier[] = [
@@ -120,12 +121,13 @@ export default function TransactionCard({
 
       if (response.success && response.hash) {
         setLastTxHash(response.hash);
+        setLastTxIsSoroban(response.isSoroban);
         setTxState("success");
         
         // Notify parent layout (starts typewriter simulation and logs history)
         const activeTier = tiers.find((t) => t.id === selectedTier);
         const tierName = activeTier ? `${activeTier.name} (${activeTier.tokens})` : "Custom Tier";
-        onTransactionSuccess(response.hash, amountToPay, tierName);
+        onTransactionSuccess(response.hash, amountToPay, tierName, response.isSoroban);
       }
     } catch (err: any) {
       console.error("Payment transaction error:", err);
@@ -353,16 +355,26 @@ export default function TransactionCard({
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3"
               >
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <div>
-                    <span className="text-xs font-bold text-white block">
-                      Transaction Completed Successfully
-                    </span>
-                    <span className="text-[10px] text-slate-300 block mt-0.5">
-                      Successfully sent {getActiveAmount()} XLM. AI Token Stream active.
-                    </span>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <div>
+                      <span className="text-xs font-bold text-white block">
+                        Transaction Completed Successfully
+                      </span>
+                      <span className="text-[10px] text-slate-300 block mt-0.5">
+                        Successfully sent {getActiveAmount()} XLM. AI Token Stream active.
+                      </span>
+                    </div>
                   </div>
+                  {/* Route Indicator Badge */}
+                  <span className={`text-[9px] font-space font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${
+                    lastTxIsSoroban 
+                      ? "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]"
+                      : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                  }`}>
+                    {lastTxIsSoroban ? "🟢 Soroban Contract" : "⚡ Horizon Pipeline"}
+                  </span>
                 </div>
 
                 <div className="pt-3 border-t border-emerald-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
