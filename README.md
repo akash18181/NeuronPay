@@ -112,22 +112,22 @@ This section contains the implementation details and verification proof for the 
 
 ##### 1. Wallet Connection State
 *Proof of wallet successfully connecting and displaying address in topbar:*
-<img width="1865" height="1042" alt="{80F51835-0C98-446A-85FA-DB42191CB7E9}" src="https://github.com/user-attachments/assets/1c91bda2-ccf2-4dea-afcb-ce4ff22dce7b" />
+<img width="1858" height="1040" alt="{548C59E2-48A8-4E90-AE5D-E5F40F502E5E}" src="https://github.com/user-attachments/assets/8d4827f4-6727-45b0-a495-c44e13db0b74" />
 <!-- Place connected state screenshot here -->
 
 ##### 2. Live XLM Balance Displayed
 *Proof of live XLM balance fetched from Horizon Testnet API:*
-<img width="1865" height="1042" alt="{80F51835-0C98-446A-85FA-DB42191CB7E9}" src="https://github.com/user-attachments/assets/755a9767-e168-4e67-a8f2-0482a6afc123" />
+<img width="1858" height="1040" alt="{548C59E2-48A8-4E90-AE5D-E5F40F502E5E}" src="https://github.com/user-attachments/assets/77460ba1-f214-4508-8716-fa3cba40f418" />
 <!-- Place balance displayed screenshot here -->
 
 ##### 3. Transaction Approval Prompt
 *Proof of Freighter Wallet signature prompt request:*
-<img width="1902" height="1082" alt="{68256B18-B983-465B-839B-D41A498922BF}" src="https://github.com/user-attachments/assets/8e00dcba-7f1f-4952-84bd-ac25d0f03105" />
+<img width="1896" height="1085" alt="{95FFB3D7-A0F7-4809-904E-6DC1A6A0A34B}" src="https://github.com/user-attachments/assets/a851aeb6-43c0-4df1-93f5-dcfbc2925272" />
 <!-- Place freighter prompt screenshot here -->
 
 ##### 4. Successful Testnet Transaction & Feedback
 *Proof of successful transaction hash feedback card with Stellar Expert Explorer link:*
-<img width="1855" height="1037" alt="{716C9BBA-029E-44B5-AF09-F0E384E57C1D}" src="https://github.com/user-attachments/assets/a5e28e48-ea0a-4d13-8dfa-e0e7fed0eda1" />
+<img width="1859" height="1037" alt="{594AF477-284C-43B5-9829-98B34C695D55}" src="https://github.com/user-attachments/assets/7b314662-02fd-4f4f-bd43-6cbb303f56e5" />
 <!-- Place successful tx screenshot here -->
 
 ---
