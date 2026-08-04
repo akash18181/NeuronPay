@@ -112,7 +112,7 @@ This section contains the implementation details and verification proof for the 
 
 ##### 1. Wallet Connection State
 *Proof of wallet successfully connecting and displaying address in topbar:*
-<img width="1865" height="1042" alt="{80F51835-0C98-446A-85FA-DB42191CB7E9}" src="https://github.com/user-attachments/assets/1c91bda2-ccf2-4dea-afcb-ce4ff22dce7b" />
+<img width="1858" height="1040" alt="{548C59E2-48A8-4E90-AE5D-E5F40F502E5E}" src="https://github.com/user-attachments/assets/8d4827f4-6727-45b0-a495-c44e13db0b74" />
 <!-- Place connected state screenshot here -->
 
 ##### 2. Live XLM Balance Displayed
