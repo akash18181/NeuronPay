@@ -132,8 +132,38 @@ This section contains the implementation details and verification proof for the 
 
 ---
 
-### Level 2: Soroban Smart Contract Billing (Coming Soon)
-*This section will be populated once the Soroban smart contract billing integrations are completed.*
+### Level 2: Soroban Smart Contract Billing
+
+This section contains implementation details and verification proof for the Level 2 (Yellow Belt) submission.
+
+#### 📜 Deployed Smart Contract Address (Stellar Testnet)
+- **Deployed Contract ID**: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`
+- **Explorer Link**: [View Deployed Soroban Contract on Stellar Expert Explorer](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC)
+
+#### ⚡ Transaction Hash for Contract Interaction
+- **Sample Contract Call Tx Hash**: `b48047271c00742b74bf10f3177cf3d64ef3c1caaf618d07d0cc60da2e8e57b3`
+- **Explorer Link**: [View Contract Call Transaction on Stellar Expert Explorer](https://stellar.expert/explorer/testnet/tx/b48047271c00742b74bf10f3177cf3d64ef3c1caaf618d07d0cc60da2e8e57b3)
+
+#### 🧪 Running the Automated CLI Test Suite
+Verify connection channels, contract IDs, and the 3 distinct error types:
+```bash
+node scripts/test_stellar.js
+```
+
+#### 📸 Verification Screenshots
+*(Screenshots to be attached manually for verification)*
+
+##### 1. Wallet Options Available
+*Proof of wallet options available (e.g. Freighter Integration):*
+<!-- Place wallet options screenshot here -->
+
+##### 2. Deployed Contract Address
+*Proof of the deployed Soroban contract address on Stellar Expert Explorer:*
+<!-- Place deployed contract address screenshot here -->
+
+##### 3. Contract Call Transaction Hash
+*Proof of the successful contract call transaction hash on Stellar Expert Explorer:*
+<!-- Place contract call tx hash screenshot here -->
 
 ---
 
