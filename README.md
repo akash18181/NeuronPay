@@ -118,10 +118,12 @@ This section contains the implementation details and verification proof for the 
 
 ##### 3. Transaction Approval Prompt
 *Proof of Freighter Wallet signature prompt request:*
+<img width="1902" height="1082" alt="{68256B18-B983-465B-839B-D41A498922BF}" src="https://github.com/user-attachments/assets/8e00dcba-7f1f-4952-84bd-ac25d0f03105" />
 <!-- Place freighter prompt screenshot here -->
 
 ##### 4. Successful Testnet Transaction & Feedback
 *Proof of successful transaction hash feedback card with Stellar Expert Explorer link:*
+<img width="1855" height="1037" alt="{716C9BBA-029E-44B5-AF09-F0E384E57C1D}" src="https://github.com/user-attachments/assets/a5e28e48-ea0a-4d13-8dfa-e0e7fed0eda1" />
 <!-- Place successful tx screenshot here -->
 
 ---
