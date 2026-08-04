@@ -19,11 +19,20 @@ import {
   Activity,
   Zap,
   Globe,
-  Loader2
+  Loader2,
+  ShieldAlert,
+  Wallet
 } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import TransactionCard from "@/components/TransactionCard";
-import { requestFriendbotFunding, fetchBalance } from "@/lib/stellar";
+import albedo from "@albedo-link/intent";
+import {
+  requestFriendbotFunding,
+  fetchBalance,
+  isFreighterInstalled,
+  connectFreighterWallet,
+  getFreighterNetwork
+} from "@/lib/stellar";
 
 interface TxReceipt {
   id: string;
@@ -112,6 +121,13 @@ export default function Page() {
   const [txHistory, setTxHistory] = useState<TxReceipt[]>([]);
   const [isFunding, setIsFunding] = useState(false);
   const [fundingSuccess, setFundingSuccess] = useState<boolean | null>(null);
+  
+  // Wallet Connection States
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showSelector, setShowSelector] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
 
   // Terminal Visualizer states
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
@@ -119,7 +135,7 @@ export default function Page() {
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const terminalLogsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Load history from localStorage on mount
+  // Load history from localStorage on mount & check Freighter installation & auto-connect
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedHistory = localStorage.getItem("neuronpay_tx_history");
@@ -130,8 +146,58 @@ export default function Page() {
           console.error("Failed to parse local transaction history:", e);
         }
       }
+
+      async function checkInstallation() {
+        const installed = await isFreighterInstalled();
+        setIsInstalled(installed);
+
+        // Auto-connect if wallet was previously active and not explicitly disconnected
+        const savedWallet = localStorage.getItem("neuronpay_active_wallet");
+        const savedType = localStorage.getItem("neuronpay_wallet_type") as "freighter" | "albedo" || "freighter";
+        const userDisconnected = localStorage.getItem("neuronpay_user_disconnected");
+
+        if (savedWallet && userDisconnected !== "true") {
+          try {
+            if (savedType === "albedo") {
+              const balance = await fetchBalance(savedWallet);
+              handleWalletConnect(savedWallet, "TESTNET", balance, "albedo");
+            } else if (installed) {
+              const networkName = await getFreighterNetwork();
+              const balance = await fetchBalance(savedWallet);
+              handleWalletConnect(savedWallet, networkName || "UNKNOWN", balance, "freighter");
+            }
+          } catch (err) {
+            console.warn("Auto-connect failed:", err);
+          }
+        }
+      }
+      checkInstallation();
     }
   }, []);
+
+  // Poll for network changes occasionally when wallet is connected
+  useEffect(() => {
+    if (!walletAddress) return;
+    const savedType = localStorage.getItem("neuronpay_wallet_type");
+    if (savedType === "albedo") {
+      setIsNetworkCorrect(true);
+      setNetwork("TESTNET");
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      try {
+        const networkName = await getFreighterNetwork();
+        const isCorrect = networkName === "TESTNET";
+        setNetwork(networkName || "UNKNOWN");
+        setIsNetworkCorrect(isCorrect);
+      } catch (err) {
+        console.warn("Error polling network state:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [walletAddress]);
 
   // Scroll terminal container to bottom when logs update
   useEffect(() => {
@@ -158,16 +224,94 @@ export default function Page() {
     ]);
   };
 
+  const handleConnectFreighter = async () => {
+    setIsConnecting(true);
+    setErrorMsg(null);
+    setShowSelector(false);
+    try {
+      const result = await connectFreighterWallet();
+      if (result.address) {
+        const networkName = await getFreighterNetwork();
+        let balance = "0.0000";
+        try {
+          balance = await fetchBalance(result.address);
+        } catch (bErr) {
+          console.warn("Could not fetch initial balance, defaulting to 0", bErr);
+        }
+
+        handleWalletConnect(result.address, networkName || "UNKNOWN", balance, "freighter");
+        
+        localStorage.setItem("neuronpay_active_wallet", result.address);
+        localStorage.setItem("neuronpay_wallet_type", "freighter");
+        localStorage.removeItem("neuronpay_user_disconnected");
+      } else {
+        setErrorMsg(result.error || "Could not retrieve public key from Freighter.");
+      }
+    } catch (err: any) {
+      console.error("Connection error:", err);
+      setErrorMsg(err?.message || "Freighter connection failed.");
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleConnectAlbedo = async () => {
+    setIsConnecting(true);
+    setErrorMsg(null);
+    setShowSelector(false);
+    try {
+      const res = await albedo.publicKey({});
+      if (res.pubkey) {
+        let balance = "0.0000";
+        try {
+          balance = await fetchBalance(res.pubkey);
+        } catch (bErr) {
+          console.warn("Could not fetch initial balance, defaulting to 0", bErr);
+        }
+
+        handleWalletConnect(res.pubkey, "TESTNET", balance, "albedo");
+
+        localStorage.setItem("neuronpay_active_wallet", res.pubkey);
+        localStorage.setItem("neuronpay_wallet_type", "albedo");
+        localStorage.removeItem("neuronpay_user_disconnected");
+      } else {
+        setErrorMsg("Could not retrieve public key from Albedo.");
+      }
+    } catch (err: any) {
+      console.error("Albedo connection error:", err);
+      setErrorMsg(err?.message || "Albedo connection failed.");
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
   const handleWalletDisconnect = () => {
     setWalletAddress(null);
     setNetwork(null);
     setWalletBalance(null);
     setIsNetworkCorrect(true);
     setTerminalLogs([
-      "🔴 Console offline. Please connect your Freighter Wallet to initialize systems."
+      "🔴 Console offline. Please connect your Stellar Wallet to initialize systems."
     ]);
     setActiveTokenCount(0);
     setIsStreaming(false);
+
+    localStorage.setItem("neuronpay_user_disconnected", "true");
+    localStorage.removeItem("neuronpay_active_wallet");
+    localStorage.removeItem("neuronpay_wallet_type");
+  };
+
+  const handleRefreshBalance = async () => {
+    if (!walletAddress) return;
+    setIsRefreshing(true);
+    try {
+      const balance = await fetchBalance(walletAddress);
+      setWalletBalance(balance);
+    } catch (err) {
+      console.error("Failed to refresh balance:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleUpdateBalance = (balance: string) => {
@@ -320,10 +464,11 @@ export default function Page() {
             walletBalance={walletBalance}
             network={network}
             isNetworkCorrect={isNetworkCorrect}
-            onConnect={handleWalletConnect}
-            onDisconnect={handleWalletDisconnect}
-            onUpdateBalance={handleUpdateBalance}
-            onUpdateNetwork={handleUpdateNetwork}
+            isConnecting={isConnecting}
+            isRefreshing={isRefreshing}
+            onConnectClick={() => setShowSelector(true)}
+            onDisconnectClick={handleWalletDisconnect}
+            onRefreshClick={handleRefreshBalance}
           />
         </header>
       </div>
@@ -629,6 +774,87 @@ export default function Page() {
       <footer className="w-full text-center text-[10px] text-slate-600 mt-auto border-t border-white/5 pt-6 select-none">
         <p>© 2026 NeuronPay. Developed for Stellar Testnet Soroban Web3 App Rubric.</p>
       </footer>
+
+      {/* Wallet Selector Modal Overlay */}
+      <AnimatePresence>
+        {showSelector && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-sm rounded-3xl bg-[#0b0f1a] border border-white/10 p-6 shadow-2xl relative"
+            >
+              <button
+                onClick={() => setShowSelector(false)}
+                className="absolute top-4 right-4 text-slate-500 hover:text-white font-mono text-lg font-bold"
+              >
+                ×
+              </button>
+              
+              <h3 className="font-space text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-cyan-400" />
+                Connect Wallet
+              </h3>
+              <p className="text-xs text-slate-400 mb-5">
+                Select your Web3 authorization keys gateway to connect with Testnet.
+              </p>
+              
+              <div className="space-y-3">
+                {/* Option 1: Freighter */}
+                <button
+                  onClick={handleConnectFreighter}
+                  disabled={isConnecting}
+                  className="w-full p-4 text-left rounded-2xl bg-slate-900/50 hover:bg-[#12182b] border border-white/5 hover:border-cyan-500/30 transition-all flex items-center gap-3 group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Cpu className="w-5 h-5 group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div>
+                    <span className="font-space font-bold text-sm text-white block">
+                      Freighter
+                    </span>
+                    <span className="text-[10px] text-slate-500 block mt-0.5">
+                      Stellar browser extension
+                    </span>
+                  </div>
+                </button>
+
+                {/* Option 2: Albedo */}
+                <button
+                  onClick={handleConnectAlbedo}
+                  disabled={isConnecting}
+                  className="w-full p-4 text-left rounded-2xl bg-slate-900/50 hover:bg-[#12182b] border border-white/5 hover:border-purple-500/30 transition-all flex items-center gap-3 group cursor-pointer"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 shrink-0">
+                    <Zap className="w-5 h-5 group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div>
+                    <span className="font-space font-bold text-sm text-white block">
+                      Albedo
+                    </span>
+                    <span className="text-[10px] text-slate-500 block mt-0.5">
+                      Secure browser-delegate keys
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Error Alert */}
+      {errorMsg && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm p-4 rounded-2xl bg-[#12070A] border border-rose-500/30 text-rose-400 text-xs flex items-start gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-fade-in">
+          <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-bold block text-white mb-0.5">Wallet Error</span>
+            <span className="text-slate-300 leading-normal">{errorMsg}</span>
+          </div>
+          <button onClick={() => setErrorMsg(null)} className="text-rose-400 hover:text-white font-bold ml-2 font-mono text-sm leading-none">×</button>
+        </div>
+      )}
     </main>
   );
 }
