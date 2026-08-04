@@ -127,7 +127,7 @@ This section contains the implementation details and verification proof for the 
 
 ##### 4. Successful Testnet Transaction & Feedback
 *Proof of successful transaction hash feedback card with Stellar Expert Explorer link:*
-<img width="1855" height="1037" alt="{716C9BBA-029E-44B5-AF09-F0E384E57C1D}" src="https://github.com/user-attachments/assets/a5e28e48-ea0a-4d13-8dfa-e0e7fed0eda1" />
+<img width="1859" height="1037" alt="{594AF477-284C-43B5-9829-98B34C695D55}" src="https://github.com/user-attachments/assets/7b314662-02fd-4f4f-bd43-6cbb303f56e5" />
 <!-- Place successful tx screenshot here -->
 
 ---
