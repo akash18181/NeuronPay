@@ -130,3 +130,4 @@ This section contains the implementation details and verification proof for the 
 
 ### Level 2: Soroban Smart Contract Billing (Coming Soon)
 *This section will be populated once the Soroban smart contract billing integrations are completed.*
+
