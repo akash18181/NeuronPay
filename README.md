@@ -162,7 +162,7 @@ node scripts/test_stellar.js
 
 ##### 2. Deployed Contract Address
 *Proof of the deployed Soroban contract address on Stellar Expert Explorer:*
-<!-- Place deployed contract address screenshot here -->
+<img width="1920" height="1033" alt="{7FEF83DD-7205-4AE6-B0E4-2E6E244B7DC3}" src="https://github.com/user-attachments/assets/0bb7f34d-e08c-42fa-b579-39fac0827e67" />
 
 ##### 3. Contract Call Transaction Hash
 *Proof of the successful contract call transaction hash on Stellar Expert Explorer:*
