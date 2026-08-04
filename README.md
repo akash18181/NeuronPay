@@ -117,7 +117,7 @@ This section contains the implementation details and verification proof for the 
 
 ##### 2. Live XLM Balance Displayed
 *Proof of live XLM balance fetched from Horizon Testnet API:*
-<img width="1865" height="1042" alt="{80F51835-0C98-446A-85FA-DB42191CB7E9}" src="https://github.com/user-attachments/assets/755a9767-e168-4e67-a8f2-0482a6afc123" />
+<img width="1858" height="1040" alt="{548C59E2-48A8-4E90-AE5D-E5F40F502E5E}" src="https://github.com/user-attachments/assets/77460ba1-f214-4508-8716-fa3cba40f418" />
 <!-- Place balance displayed screenshot here -->
 
 ##### 3. Transaction Approval Prompt
