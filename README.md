@@ -194,7 +194,7 @@ This section contains implementation details and verification proof for the Leve
 
 ##### 2. CI/CD Pipeline Running (GitHub Actions)
 *Proof of CI/CD running lint, tests, and build on every push:*
-<!-- Place CI/CD pipeline screenshot here -->
+<img width="1854" height="1043" alt="{DCC30CF9-DDD1-46E6-9D3A-F9685C1A9916}" src="https://github.com/user-attachments/assets/74ea3a86-ea05-4439-9c18-0fdc7b4ff616" />
 
 ##### 3. Test Output with 3+ Passing Tests (6/6 Passed)
 *Proof of running 'npm test' showing 6 successful tests:*
