@@ -377,8 +377,8 @@ export async function fetchContractEvents(contractId: string = DEPLOYED_SOROBAN_
 
       return {
         id: evt.id,
-        contractId: evt.contractId,
-        ledgerSeq: evt.ledgerSeq,
+        contractId: evt.contractId ? evt.contractId.toString() : "",
+        ledgerSeq: evt.ledger,
         topic: topics,
         value: evt.value.toString(),
       };
