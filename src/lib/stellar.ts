@@ -335,3 +335,58 @@ export function categorizeTransactionError(
     solution: "Ensure Freighter is set to Testnet, check your network connection, and try again.",
   };
 }
+
+export interface SorobanEvent {
+  id: string;
+  contractId: string;
+  ledgerSeq: number;
+  topic: string[];
+  value: string;
+  timestamp?: string;
+}
+
+/**
+ * Fetch recent contract events from the Soroban RPC endpoint.
+ */
+export async function fetchContractEvents(contractId: string = DEPLOYED_SOROBAN_CONTRACT_ID): Promise<SorobanEvent[]> {
+  try {
+    const latestLedgerObj = await sorobanServer.getLatestLedger();
+    const endLedger = latestLedgerObj.sequence;
+    const startLedger = Math.max(1, endLedger - 100);
+
+    const response = await sorobanServer.getEvents({
+      startLedger,
+      filters: [
+        {
+          type: "contract",
+          contractIds: [contractId],
+        },
+      ],
+      limit: 10,
+    });
+
+    const parsedEvents: SorobanEvent[] = response.events.map((evt) => {
+      let topics: string[] = [];
+      try {
+        if (Array.isArray(evt.topic)) {
+          topics = evt.topic.map((t) => t.toString());
+        }
+      } catch (e) {
+        topics = ["UNKNOWN"];
+      }
+
+      return {
+        id: evt.id,
+        contractId: evt.contractId,
+        ledgerSeq: evt.ledgerSeq,
+        topic: topics,
+        value: evt.value.toString(),
+      };
+    });
+
+    return parsedEvents;
+  } catch (error) {
+    console.warn("Failed to fetch Soroban contract events:", error);
+    return [];
+  }
+}
