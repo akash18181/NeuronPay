@@ -198,7 +198,7 @@ This section contains implementation details and verification proof for the Leve
 
 ##### 3. Test Output with 3+ Passing Tests (6/6 Passed)
 *Proof of running 'npm test' showing 6 successful tests:*
-<!-- Place test output screenshot here -->
+<img width="813" height="578" alt="{DEFEC0B1-EB20-4861-90BD-BB2417B6C854}" src="https://github.com/user-attachments/assets/594d0361-9cee-4a37-8cf0-a5f1a4d311dc" />
 
 ---
 
