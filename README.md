@@ -186,7 +186,7 @@ This section contains implementation details and verification proof for the Leve
 - **Demo Walkthrough Video (1-2 mins)**: *(Demo video link to be attached manually by user)*
 
 #### 📸 Verification Screenshots
-*(Screenshots to be attached manually for verification)*
+
 
 ##### 1. Mobile Responsive UI
 *Proof of mobile-responsive frontend layout:*
