@@ -4,7 +4,7 @@ NeuronPay is a decentralized pay-as-you-go micro-billing protocol designed for g
 
 ### 🌐 Live Production DApp
 - **Vercel Deployment**: [https://neuron-pay.vercel.app](https://neuron-pay.vercel.app)
-- **Demo Walkthrough Video (1-2 mins)**: *(Demo video link to be attached manually by user)*
+- **Demo Walkthrough Video**: [Watch on YouTube](https://youtu.be/gcsZRINMhdY)
 
 ---
 
