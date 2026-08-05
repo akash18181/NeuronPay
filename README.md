@@ -190,7 +190,7 @@ This section contains implementation details and verification proof for the Leve
 
 ##### 1. Mobile Responsive UI
 *Proof of mobile-responsive frontend layout:*
-<img width="300" height="400" alt="Screenshot_20260805-204534" src="https://github.com/user-attachments/assets/64677431-5632-4ea1-85ea-2648b02cc008" />
+<img width="500" height="400" alt="Screenshot_20260805-204534" src="https://github.com/user-attachments/assets/64677431-5632-4ea1-85ea-2648b02cc008" />
 
 ##### 2. CI/CD Pipeline Running (GitHub Actions)
 *Proof of CI/CD running lint, tests, and build on every push:*
