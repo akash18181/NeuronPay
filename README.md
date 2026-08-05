@@ -4,6 +4,7 @@ NeuronPay is a decentralized pay-as-you-go micro-billing protocol designed for g
 
 ### 🌐 Live Production DApp
 - **Vercel Deployment**: [https://neuron-pay.vercel.app](https://neuron-pay.vercel.app)
+- **Demo Walkthrough Video (1-2 mins)**: *(Demo video link to be attached manually by user)*
 
 ---
 
@@ -182,8 +183,6 @@ This section contains implementation details and verification proof for the Leve
 - **Sample Contract Invocation Tx Hash**: `b48047271c00742b74bf10f3177cf3d64ef3c1caaf618d07d0cc60da2e8e57b3`
 - **Explorer Link**: [View Contract Call Transaction on Stellar Expert Explorer](https://stellar.expert/explorer/testnet/tx/b48047271c00742b74bf10f3177cf3d64ef3c1caaf618d07d0cc60da2e8e57b3)
 
-#### 🎥 Demo Walkthrough Video Link
-- **Demo Walkthrough Video (1-2 mins)**: *(Demo video link to be attached manually by user)*
 
 #### 📸 Verification Screenshots
 
