@@ -503,8 +503,8 @@ export default function Page() {
 
       {/* HEADER SECTION (Floating Capsule Style) */}
       <div className="relative z-10 w-full px-4 lg:px-8 pt-6">
-        <header className="max-w-7xl mx-auto rounded-full bg-[#0b0f1a]/85 backdrop-blur-xl border border-white/5 px-6 py-3.5 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-          <div className="flex items-center gap-3">
+        <header className="max-w-7xl mx-auto rounded-[24px] sm:rounded-full bg-[#0b0f1a]/85 backdrop-blur-xl border border-white/5 px-6 py-4 sm:py-3.5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center gap-3 justify-center sm:justify-start select-none">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.3)]">
               <Cpu className="w-4.5 h-4.5 text-slate-950 stroke-[2.5]" />
             </div>
@@ -513,17 +513,19 @@ export default function Page() {
             </h1>
           </div>
 
-          <WalletConnect
-            walletAddress={walletAddress}
-            walletBalance={walletBalance}
-            network={network}
-            isNetworkCorrect={isNetworkCorrect}
-            isConnecting={isConnecting}
-            isRefreshing={isRefreshing}
-            onConnectClick={() => setShowSelector(true)}
-            onDisconnectClick={handleWalletDisconnect}
-            onRefreshClick={handleRefreshBalance}
-          />
+          <div className="flex justify-center sm:justify-end">
+            <WalletConnect
+              walletAddress={walletAddress}
+              walletBalance={walletBalance}
+              network={network}
+              isNetworkCorrect={isNetworkCorrect}
+              isConnecting={isConnecting}
+              isRefreshing={isRefreshing}
+              onConnectClick={() => setShowSelector(true)}
+              onDisconnectClick={handleWalletDisconnect}
+              onRefreshClick={handleRefreshBalance}
+            />
+          </div>
         </header>
       </div>
 
