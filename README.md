@@ -170,6 +170,38 @@ node scripts/test_stellar.js
 
 ---
 
+### Level 3: Orange Belt Submission
+
+This section contains implementation details and verification proof for the Level 3 (Orange Belt) submission.
+
+#### 📜 Deployed Soroban Contract Address
+- **Contract ID**: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`
+- **Explorer Link**: [View Soroban Contract on Stellar Expert Explorer](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC)
+
+#### ⚡ Transaction Hash for Contract Interaction
+- **Sample Contract Invocation Tx Hash**: `b48047271c00742b74bf10f3177cf3d64ef3c1caaf618d07d0cc60da2e8e57b3`
+- **Explorer Link**: [View Contract Call Transaction on Stellar Expert Explorer](https://stellar.expert/explorer/testnet/tx/b48047271c00742b74bf10f3177cf3d64ef3c1caaf618d07d0cc60da2e8e57b3)
+
+#### 🎥 Demo Walkthrough Video Link
+- **Demo Walkthrough Video (1-2 mins)**: *(Demo video link to be attached manually by user)*
+
+#### 📸 Verification Screenshots
+*(Screenshots to be attached manually for verification)*
+
+##### 1. Mobile Responsive UI
+*Proof of mobile-responsive frontend layout:*
+<!-- Place mobile responsive UI screenshot here -->
+
+##### 2. CI/CD Pipeline Running (GitHub Actions)
+*Proof of CI/CD running lint, tests, and build on every push:*
+<!-- Place CI/CD pipeline screenshot here -->
+
+##### 3. Test Output with 3+ Passing Tests (6/6 Passed)
+*Proof of running 'npm test' showing 6 successful tests:*
+<!-- Place test output screenshot here -->
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
